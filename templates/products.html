@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Electronics Product Catalogue</title>
+</head>
+<body>
+
+    <h1>Electronics Product Catalogue</h1>
+
+    <!-- Search and Filter Form -->
+    <form method="GET" action="{% url 'product_list' %}">
+
+        <!-- Search -->
+        <label for="q">Search products:</label>
+        <input
+            type="text"
+            id="q"
+            name="q"
+            placeholder="Search products..."
+            value="{{ query|default:'' }}"
+        >
+
+        <br><br>
+
+        <!-- Category Filter -->
+        <label for="category">Category:</label>
+        <select name="category" id="category">
+            <option value="">All Categories</option>
+
+            {% for category in categories %}
+                <option
+                    value="{{ category.name }}"
+                    {% if category.name == selected_category %}selected{% endif %}
+                >
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <!-- Tag Filter -->
+        <label for="tag">Tag:</label>
+        <select name="tag" id="tag">
+            <option value="">All Tags</option>
+
+            {% for tag in tags %}
+                <option
+                    value="{{ tag.name }}"
+                    {% if tag.name == selected_tag %}selected{% endif %}
+                >
+                    {{ tag.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <!-- Sorting -->
+        <label for="sort">Sort products:</label>
+        <select name="sort" id="sort">
+            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>
+                Name: A to Z
+            </option>
+
+            <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>
+                Name: Z to A
+            </option>
+
+            <option value="price" {% if sort_by == 'price' %}selected{% endif %}>
+                Price: Low to High
+            </option>
+
+            <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>
+                Price: High to Low
+            </option>
+        </select>
+
+        <br><br>
+
+        <button type="submit">Apply Filters</button>
+
+        <a href="{% url 'product_list' %}">Clear Filters</a>
+
+    </form>
+
+    <hr>
+
+    <!-- Search Results -->
+    {% if query %}
+        <p>Search results for: {{ query }}</p>
+    {% endif %}
+
+    <!-- Product Count -->
+    <p>Total Products: {{ page_obj.paginator.count }}</p>
+
+    <!-- Product List -->
+    {% for product in products %}
+
+        <div>
+            <h2>{{ product.name }}</h2>
+
+            <p>{{ product.description }}</p>
+
+            <p>Price: ${{ product.price }} CAD</p>
+
+            <p>Category: {{ product.category.name }}</p>
+
+            <p>Tags:
+                {% for tag in product.tags.all %}
+                    {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    No tags
+                {% endfor %}
+            </p>
+        </div>
+
+        <hr>
+
+    {% empty %}
+        <p>No products available.</p>
+    {% endfor %}
+
+    <!-- Pagination -->
+
+    {% if page_obj.has_other_pages %}
+
+        <div class="pagination">
+
+            {% if page_obj.has_previous %}
+
+                <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page=1">
+                    First
+                </a>
+
+                <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.previous_page_number }}">
+                    Previous
+                </a>
+
+            {% endif %}
+
+            <span>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+
+                <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+
+                <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.paginator.num_pages }}">
+                    Last
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</body>
+</html>
