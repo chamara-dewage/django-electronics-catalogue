@@ -2,16 +2,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Defines the page title displayed in the browser tab -->
     <title>Electronics Product Catalogue</title>
 </head>
 <body>
 
+    <!-- Main page heading -->
     <h1>Electronics Product Catalogue</h1>
 
-    <!-- Search and Filter Form -->
+    <!-- ========================================= -->
+    <!-- 1. SEARCH AND FILTER FORM                  -->
+    <!-- ========================================= -->
+
+    <!-- GET method sends search and filter values through the URL -->
+    <!-- The form submits to the product_list view -->
     <form method="GET" action="{% url 'product_list' %}">
 
-        <!-- Search -->
+        <!-- Search: Allows users to search products by keyword -->
         <label for="q">Search products:</label>
         <input
             type="text"
@@ -23,7 +30,8 @@
 
         <br><br>
 
-        <!-- Category Filter -->
+        <!-- Category Filter: Displays available product categories -->
+        <!-- Loops through categories passed from the Django view -->
         <label for="category">Category:</label>
         <select name="category" id="category">
             <option value="">All Categories</option>
@@ -40,7 +48,8 @@
 
         <br><br>
 
-        <!-- Tag Filter -->
+        <!-- Tag Filter: Displays available product tags -->
+        <!-- Allows users to filter products by tag -->
         <label for="tag">Tag:</label>
         <select name="tag" id="tag">
             <option value="">All Tags</option>
@@ -57,7 +66,8 @@
 
         <br><br>
 
-        <!-- Sorting -->
+        <!-- Sorting: Allows users to sort products by name or price -->
+        <!-- A minus sign (-) indicates descending order -->
         <label for="sort">Sort products:</label>
         <select name="sort" id="sort">
             <option value="name" {% if sort_by == 'name' %}selected{% endif %}>
@@ -79,34 +89,55 @@
 
         <br><br>
 
+        <!-- Submits the selected search, filter and sorting options -->
         <button type="submit">Apply Filters</button>
 
+        <!-- Clears all search and filter parameters -->
         <a href="{% url 'product_list' %}">Clear Filters</a>
 
     </form>
 
     <hr>
 
-    <!-- Search Results -->
+    <!-- ========================================= -->
+    <!-- 2. SEARCH RESULTS                         -->
+    <!-- ========================================= -->
+
+    <!-- Displays the search keyword when a search is performed -->
     {% if query %}
         <p>Search results for: {{ query }}</p>
     {% endif %}
 
-    <!-- Product Count -->
+    <!-- ========================================= -->
+    <!-- 3. PRODUCT COUNT                          -->
+    <!-- ========================================= -->
+
+    <!-- Displays the total number of matching products across all pages -->
+    <!-- paginator.count is not limited to the products on the current page -->
     <p>Total Products: {{ page_obj.paginator.count }}</p>
 
-    <!-- Product List -->
+    <!-- ========================================= -->
+    <!-- 4. PRODUCT LIST                           -->
+    <!-- ========================================= -->
+
+    <!-- Loops through the products passed from the Django view -->
     {% for product in products %}
 
         <div>
+            <!-- Displays the product name -->
             <h2>{{ product.name }}</h2>
 
+            <!-- Displays the product description -->
             <p>{{ product.description }}</p>
 
+            <!-- Displays the product price in Canadian dollars -->
             <p>Price: ${{ product.price }} CAD</p>
 
+            <!-- Displays the category associated with the product -->
             <p>Category: {{ product.category.name }}</p>
 
+            <!-- Displays all tags associated with the product -->
+            <!-- A product can have multiple tags -->
             <p>Tags:
                 {% for tag in product.tags.all %}
                     {{ tag.name }}{% if not forloop.last %}, {% endif %}
@@ -118,38 +149,52 @@
 
         <hr>
 
+    <!-- Displays a message if no products match the search or filters -->
     {% empty %}
         <p>No products available.</p>
     {% endfor %}
 
-    <!-- Pagination -->
+    <!-- ========================================= -->
+    <!-- 5. PAGINATION                             -->
+    <!-- ========================================= -->
 
+    <!-- Displays pagination controls only when multiple pages exist -->
     {% if page_obj.has_other_pages %}
 
         <div class="pagination">
 
+            <!-- Previous navigation options -->
+            <!-- Displayed only when a previous page exists -->
             {% if page_obj.has_previous %}
 
+                <!-- Navigates directly to the first page -->
+                <!-- Preserves existing search, category, tag and sorting parameters -->
                 <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page=1">
                     First
                 </a>
 
+                <!-- Navigates to the previous page -->
                 <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.previous_page_number }}">
                     Previous
                 </a>
 
             {% endif %}
 
+            <!-- Displays the current page number and total number of pages -->
             <span>
                 Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
 
+            <!-- Next navigation options -->
+            <!-- Displayed only when a next page exists -->
             {% if page_obj.has_next %}
 
+                <!-- Navigates to the next page -->
                 <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.next_page_number }}">
                     Next
                 </a>
 
+                <!-- Navigates directly to the last page -->
                 <a href="?q={{ query|urlencode }}&category={{ selected_category|urlencode }}&tag={{ selected_tag|urlencode }}&sort={{ sort_by|urlencode }}&page={{ page_obj.paginator.num_pages }}">
                     Last
                 </a>
